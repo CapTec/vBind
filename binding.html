@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+ <title>Two Way Binding Demonstration</title>
+ <meta charset="utf8">
+ <script src="events.js" type="text/javascript"></script>
+ <script src="binding.js" type="text/javascript"></script>
+</head>
+<body>
+  <div id="container1"></div>
+  <div id="container2"></div>
+  <div id="container3"></div>
+  <script>
+    var boundObject = {
+      "greeting": "Hello World! I'm bound!",
+      "message": "how are you today?",
+      "activated": false,
+      "selected": "Item 1",
+      "number":1234,
+      "template2Label": "Ooogabugga!!"
+    };
+
+	var temp1 = new Template({
+      path: './templates/template1.html',
+      container: '#container1',
+      data: boundObject,
+      model: "boundObject"
+    });
+
+    var temp2 = new Template({
+      path: './templates/template2.html',
+      container: '#container2',
+      data: boundObject,
+      model: "boundObject"
+    });
+
+    var temp3 = new Template({
+      path: './templates/template3.html',
+      container: '#container3',
+      data: boundObject,
+      model: "boundObject"
+    });
+	</script>
+</body>
+</html>
