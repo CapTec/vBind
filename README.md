@@ -31,6 +31,7 @@ Create a new template file, e.g. /templates/template1.html which looks like this
 <input value="${message}" type="text" />
 <input checked="${activated}" type="checkbox" />
 <input value="${number}" type="number" />
+<label>${template2Label}</label>
 ```
 
 And finally create a new Template instance, passing in the path to a template, the container we wish to use, the data to bind against and a model name.
@@ -44,3 +45,5 @@ var temp1 = new Template({
 ```
 
 Markup that uses variable interpolation must be formatted similarly to as if it was a standard ES6 template string, where variables are stored within "${variable}".
+
+vBind reflects changes made to bound object properties in real time. It wraps the getter and setter functions for bound properties and publishes change events to an eventing system when changes are made. This means that changing a property on the underlying bound object using javascript will immediately be reflected on the UI with no need for any manual intervention. 
