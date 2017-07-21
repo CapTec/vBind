@@ -1,7 +1,5 @@
 # vBind
-A small light-weight two way binding javascript library
-
-vBind allows two way data binding between javascript objects and HTML markup using standardised syntax.
+vBind allows two way data binding between javascript objects and HTML markup using standardised variable interpolation syntax as found in ES6 template strings.
 
 Usage:
 First, create a data object to bind.
@@ -44,3 +42,5 @@ var temp1 = new Template({
     model: "boundObject"
   });
 ```
+
+Markup that uses variable interpolation must be formatted similarly to as if it was a standard ES6 template string, where variables are stored within "${variable}".
