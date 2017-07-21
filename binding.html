@@ -12,35 +12,35 @@
   <div id="container2"></div>
   <div id="container3"></div>
   <script>
-    var boundObject = {
-      "greeting": "Hello World! I'm bound!",
-      "message": "how are you today?",
-      "activated": false,
-      "selected": "Item 1",
-      "number":1234,
-      "template2Label": "Ooogabugga!!"
-    };
+  var boundObject = {
+    "greeting": "Hello World! I'm bound!",
+    "message": "how are you today?",
+    "activated": false,
+    "selected": "Item 1",
+    "number":1234,
+    "template2Label": "Ooogabugga!!"
+  };
 
-	var temp1 = new Template({
-      path: './templates/template1.html',
-      container: '#container1',
-      data: boundObject,
-      model: "boundObject"
-    });
+  var temp1 = new Template({
+    path: './templates/template1.html',
+    container: '#container1',
+    data: boundObject,
+    model: "boundObject"
+  });
 
-    var temp2 = new Template({
-      path: './templates/template2.html',
-      container: '#container2',
-      data: boundObject,
-      model: "boundObject"
-    });
+  var temp2 = new Template({
+    path: './templates/template2.html',
+    container: '#container2',
+    data: boundObject,
+    model: "boundObject"
+  });
 
-    var temp3 = new Template({
-      path: './templates/template3.html',
-      container: '#container3',
-      data: boundObject,
-      model: "boundObject"
-    });
-	</script>
+  var temp3 = new Template({
+    path: './templates/template3.html',
+    container: '#container3',
+    data: boundObject,
+    model: "boundObject"
+  });
+  </script>
 </body>
 </html>
