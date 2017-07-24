@@ -239,7 +239,7 @@
   }
 
   /*
-   * Load the resource at a given path using aync ajax
+   * Load the resource at a given path using async ajax
    * @param {string} path - The path of the resource to load
    * @param {callback} callback - A function to execute when async loading is complete
    *
