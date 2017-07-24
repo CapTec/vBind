@@ -1,4 +1,4 @@
-(function (namespace) {
+(function(namespace) {
   'use string';
   var events = namespace.events;
 
@@ -53,10 +53,10 @@
   function override(prop, model) {
     var _private = this[prop];
     Object.defineProperty(this, prop, {
-      get: function () {
+      get: function() {
         return _private;
       },
-      set: function (val) {
+      set: function(val) {
         _private = val;
         events.publish(model + '.' + prop + ':change', val);
       }
@@ -72,9 +72,9 @@
       var text = element.textContent;
 
       var variables = getExpressionVariables({
-          name: 'textContent',
-          value: element.textContent
-        });
+        name: 'textContent',
+        value: element.textContent
+      });
 
       if (variables !== null) {
         for (var i = 0; i < variables.length; i++) {
@@ -91,8 +91,8 @@
    */
   function dataChanged(value, variable, element, text) {
     var variables = getExpressionVariables({
-        value: text
-      });
+      value: text
+    });
     var idx = variables.indexOf(variable);
 
     if (idx > -1) {
@@ -109,14 +109,13 @@
   }
 
   /*
-   * wires up a subscriber that listens for model data changes 
+   * wires up a subscriber that listens for model data changes
    */
   function setElementText(variable, element, text) {
     if (this.data.hasOwnProperty(variable)) {
-      events.subscribe(this.model + '.' + variable + ':change', function (value) {
+      events.subscribe(this.model + '.' + variable + ':change', function(value) {
         dataChanged.call(this, value, variable, element, text, this.data);
-      }
-        .bind(this));
+      }.bind(this));
       events.publish(this.model + '.' + variable + ':change', this.data[variable]);
     }
   }
@@ -133,17 +132,19 @@
   }
 
   function setAttributeToVariableValues(element, variables, attribute) {
-    if (variables !== null) {
-      for (var i = 0; i < variables.length; i++) {
-        var variable = variables[i];
-        if (this.data.hasOwnProperty(variable)) {
-          bind.call(this, element, this.data, attribute, variable);
-          element[attribute.name] = attribute.value.replace('${' + variable + '}', this.data[variable]);
-          events.subscribe(this.model + '.' + variable + ':change', function (value) {
-            element[attribute.name] = value;
-          });
-        }
-      }
+    if (variables === null)
+      return;
+
+    for (var i = 0; i < variables.length; i++) {
+      var variable = variables[i];
+      if (!this.data.hasOwnProperty(variable))
+        continue;
+
+      bind.call(this, element, this.data, attribute, variable);
+      element[attribute.name] = attribute.value.replace('${' + variable + '}', this.data[variable]);
+      events.subscribe(this.model + '.' + variable + ':change', function(value) {
+        element[attribute.name] = value;
+      });
     }
   }
 
@@ -153,34 +154,34 @@
       var attributes = getElementAttributes(element);
       setTextContent.call(this, element);
       setAttributeValues.call(this, element, attributes);
-
     }
   }
 
   function getExpressionVariables(attribute) {
     var variables = null;
-    if (attribute.value !== null || attribute.value !== '') {
-      var regex = /\${([A-Za-z\d]+?)\}/g;
-      let m;
-      while ((m = regex.exec(attribute.value)) !== null) {
-        if (variables === null) {
-          variables = [];
-        }
+    if (attribute.value === null || attribute.value === '')
+      return variables;
 
-        if (m.index === regex.lastIndex) {
-          regex.lastIndex++;
-        }
+    var regex = /\${([A-Za-z\d]+?)\}/g;
+    let m;
+    while ((m = regex.exec(attribute.value)) !== null) {
+      if (variables === null) {
+        variables = [];
+      }
 
-        if (m.length > 0) {
-          variables.push(m[1]);
-        }
+      if (m.index === regex.lastIndex) {
+        regex.lastIndex++;
+      }
+
+      if (m.length > 0) {
+        variables.push(m[1]);
       }
     }
     return variables;
   }
 
   function getElementAttributes(el) {
-    return [].slice.call(el.attributes).map(function (attr) {
+    return [].slice.call(el.attributes).map(function(attr) {
       return {
         name: attr.name,
         value: attr.value
@@ -197,7 +198,7 @@
 
   /*
    * populates the Template container with the given markup
-   * @param {string} markup - The HTML markup to inject into the 
+   * @param {string} markup - The HTML markup to inject into the
    *                          current container
    */
   function populateContainer(markup) {
@@ -211,30 +212,26 @@
    */
   function bind(element, data, attribute, property) {
     switch (element.tagName.toLowerCase()) {
-    case 'input':
-      if (element.type === 'checkbox' || element.type === 'radio') {
-        element.addEventListener('change', function (e) {
+      case 'input':
+        if (element.type === 'checkbox' || element.type === 'radio') {
+          element.addEventListener('change', function(e) {
+            data[property] = element[attribute.name];
+          }.bind(this));
+        } else if (element.type === 'number') {
+          element.addEventListener('input', function(e) {
+            data[property] = parseFloat(element[attribute.name]);
+          }.bind(this));
+        } else {
+          element.addEventListener('input', function(e) {
+            data[property] = element[attribute.name];
+          }.bind(this));
+        }
+        break;
+      case 'select':
+        element.addEventListener('change', function(e) {
           data[property] = element[attribute.name];
-        }
-          .bind(this));
-      } else if (element.type === 'number') {
-        element.addEventListener('input', function (e) {
-          data[property] = parseFloat(element[attribute.name]);
-        }
-          .bind(this));
-      } else {
-        element.addEventListener('input', function (e) {
-          data[property] = element[attribute.name];
-        }
-          .bind(this));
-      }
-      break;
-    case 'select':
-      element.addEventListener('change', function (e) {
-        data[property] = element[attribute.name];
-      }
-        .bind(this));
-      break;
+        }.bind(this));
+        break;
     }
   }
 
@@ -247,7 +244,7 @@
   function getTemplate(path, callback) {
     var xhr = new XMLHttpRequest();
 
-    xhr.addEventListener("readystatechange", function () {
+    xhr.addEventListener("readystatechange", function() {
       if (this.readyState === 4) {
         callback.call(null, this.responseText);
       }
