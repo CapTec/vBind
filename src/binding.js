@@ -3,36 +3,34 @@
   var events = namespace.events;
 
   function Template(args) {
-    if (args.container !== null) {
-      if (typeof args.container !== 'string') {
-        this.container = args.container;
-      } else {
-        this.container = document.querySelector(args.container);
-      }
-    } else {
+    if (typeof args.container === 'undefined' || args.container === null)
       throw new Error('No container element or selector provided for template.');
-    }
 
-    if (typeof args.data !== 'undefined' && args.data !== null) {
+    this.container = typeof args.container === 'string' ?
+      document.querySelector(args.container) : args.container;
+
+    if (typeof args.data !== 'undefined' && args.data !== null)
       this.data = args.data;
-    }
 
-    if (typeof args.path === 'string') {
-      getTemplate(args.path, populateContainer.bind(this));
-    } else {
+    if (typeof args.path !== 'string')
       throw new Error('A template path must be specified');
-    }
 
-    if (typeof args.model === 'string') {
+    getTemplate(args.path, populateContainer.bind(this), function(result) {
+      throw new Error(result);
+    });
+
+    if (typeof args.model === 'string')
       this.model = args.model;
-    }
 
-    overrideProps(this.data, this.model);
+    this._overrideProps();
   }
 
   Template.prototype = {
     children: [],
-    container: null
+    container: null,
+    _overrideProps: overrideProps,
+    _override: override,
+    _bindToData: bindToData
   };
 
   /*
@@ -41,24 +39,25 @@
    * @param {Object} data - The data to publish changes for
    * @param {string} model - The model name to publish changes for
    */
-  function overrideProps(data, model) {
-    for (var prop in data) {
-      if (!data.hasOwnProperty(prop))
+  function overrideProps() {
+    for (var prop in this.data) {
+      if (!this.data.hasOwnProperty(prop))
         continue;
 
-      override.call(data, prop, model);
+      this._override(prop);
     }
   }
 
-  function override(prop, model) {
-    var _private = this[prop];
-    Object.defineProperty(this, prop, {
+  function override(prop) {
+    var _private = this.data[prop],
+        scope = this;
+    Object.defineProperty(scope.data, prop, {
       get: function() {
         return _private;
       },
       set: function(val) {
         _private = val;
-        events.publish(model + '.' + prop + ':change', val);
+        events.publish(scope.model + '.' + prop + ':change', val);
       }
     });
   };
@@ -68,20 +67,21 @@
    * expressions with actual values where appropriate
    */
   function setTextContent(element) {
-    if (element.textContent && element.textContent.length > 0) {
-      var text = element.textContent;
+    if (element.textContent && element.textContent.length <= 0)
+      return;
 
-      var variables = getExpressionVariables({
+    var text = element.textContent,
+      variables = getExpressionVariables({
         name: 'textContent',
         value: element.textContent
       });
 
-      if (variables !== null) {
-        for (var i = 0; i < variables.length; i++) {
-          var variable = variables[i];
-          setElementText.call(this, variable, element, text);
-        }
-      }
+    if (variables === null)
+      return;
+
+    for (var i = 0; i < variables.length; i++) {
+      var variable = variables[i];
+      setElementText.call(this, variable, element, text);
     }
   }
 
@@ -91,15 +91,14 @@
    */
   function dataChanged(value, variable, element, text) {
     var variables = getExpressionVariables({
-      value: text
-    });
-    var idx = variables.indexOf(variable);
+        value: text
+      }),
+      idx = variables.indexOf(variable),
+      txt = text;
 
-    if (idx > -1) {
+    if (idx > -1)
       variables.splice(idx, 1);
-    }
 
-    var txt = text;
     for (var i = 0; i < variables.length; i++) {
       var vari = variables[i];
       txt = txt.replace('${' + vari + '}', this.data[vari]);
@@ -112,12 +111,14 @@
    * wires up a subscriber that listens for model data changes
    */
   function setElementText(variable, element, text) {
-    if (this.data.hasOwnProperty(variable)) {
-      events.subscribe(this.model + '.' + variable + ':change', function(value) {
-        dataChanged.call(this, value, variable, element, text, this.data);
-      }.bind(this));
-      events.publish(this.model + '.' + variable + ':change', this.data[variable]);
-    }
+    if (!this.data.hasOwnProperty(variable))
+      return;
+
+    events.subscribe(this.model + '.' + variable + ':change', function(value) {
+      dataChanged.call(this, value, variable, element, text, this.data);
+    }.bind(this));
+
+    events.publish(this.model + '.' + variable + ':change', this.data[variable]);
   }
 
   /*
@@ -165,18 +166,16 @@
     var regex = /\${([A-Za-z\d]+?)\}/g;
     let m;
     while ((m = regex.exec(attribute.value)) !== null) {
-      if (variables === null) {
+      if (variables === null)
         variables = [];
-      }
 
-      if (m.index === regex.lastIndex) {
+      if (m.index === regex.lastIndex)
         regex.lastIndex++;
-      }
 
-      if (m.length > 0) {
+      if (m.length > 0)
         variables.push(m[1]);
-      }
     }
+
     return variables;
   }
 
@@ -204,7 +203,7 @@
   function populateContainer(markup) {
     this.container.innerHTML = markup;
     populateChildrenProperty.call(this);
-    bindToData.call(this);
+    this._bindToData();
   }
 
   /*
@@ -213,26 +212,36 @@
   function bind(element, data, attribute, property) {
     switch (element.tagName.toLowerCase()) {
       case 'input':
-        if (element.type === 'checkbox' || element.type === 'radio') {
-          element.addEventListener('change', function(e) {
-            data[property] = element[attribute.name];
-          }.bind(this));
-        } else if (element.type === 'number') {
-          element.addEventListener('input', function(e) {
-            data[property] = parseFloat(element[attribute.name]);
-          }.bind(this));
-        } else {
-          element.addEventListener('input', function(e) {
-            data[property] = element[attribute.name];
-          }.bind(this));
-        }
+        bindInput.call(this, element, data, attribute, property);
         break;
       case 'select':
-        element.addEventListener('change', function(e) {
-          data[property] = element[attribute.name];
-        }.bind(this));
+        bindSelect.call(this, element, data, attribute, property);
         break;
     }
+  }
+
+  function bindInput(element, data, attribute, property) {
+    if (element.type === 'checkbox' || element.type === 'radio') {
+      element.addEventListener('change', bindChkOrRadio.bind(this, element, data, attribute, property));
+    } else if (element.type === 'number') {
+      element.addEventListener('input', function(e) {
+        data[property] = parseFloat(element[attribute.name]);
+      }.bind(this));
+    } else {
+      element.addEventListener('input', function(e) {
+        data[property] = element[attribute.name];
+      }.bind(this));
+    }
+  }
+
+  function bindChkOrRadio(element, data, attribute, property) {
+    data[property] = element[attribute.name];
+  }
+
+  function bindSelect(element, data, attribute, property) {
+    element.addEventListener('change', function(e) {
+      data[property] = element[attribute.name];
+    }.bind(this));
   }
 
   /*
@@ -241,12 +250,14 @@
    * @param {callback} callback - A function to execute when async loading is complete
    *
    */
-  function getTemplate(path, callback) {
+  function getTemplate(path, success_callback, failure_callback) {
     var xhr = new XMLHttpRequest();
 
     xhr.addEventListener("readystatechange", function() {
-      if (this.readyState === 4) {
-        callback.call(null, this.responseText);
+      if (this.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+        success_callback.call(null, this.responseText);
+      } else if(this.readyState === XMLHttpRequest.DONE && xhr.status !== 200) {
+        failure_callback.call(null, this.responseText);
       }
     });
 
