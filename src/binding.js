@@ -44,7 +44,7 @@
   function overrideProps(data, model) {
     for (var prop in data) {
       if (!data.hasOwnProperty(prop))
-        cotinue;
+        continue;
 
       override.call(data, prop, model);
     }
