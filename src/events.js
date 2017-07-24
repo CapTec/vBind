@@ -1,7 +1,8 @@
 (function(global) {
   'use strict';
-  var subscribers = {},
-      events = {};
+  var events = {
+    subscribers: {}
+  };
 
   /*
    * Registers a subscription event listener.
@@ -10,16 +11,16 @@
    * @returns {Object} - Removes a subscription.
    */
   events.subscribe = function(eventName, listener) {
-    if (!subscribers.hasOwnProperty(eventName)) {
-      subscribers[eventName] = [];
+    if (!this.subscribers.hasOwnProperty(eventName)) {
+      this.subscribers[eventName] = [];
     }
 
-    var index = subscribers[eventName].push(listener) - 1;
+    var index = this.subscribers[eventName].push(listener) - 1;
 
     return {
       remove: function() {
-        delete subscribers[eventName][index];
-      }
+        delete events.subscribers[eventName][index];
+	  }
     };
   };
 
@@ -29,22 +30,20 @@
    * @param {Object} info - The object to pass to a listener function.
    */
   events.publish = function(eventName, info) {
-    if (!subscribers.hasOwnProperty(eventName)) {
+    if (!this.subscribers.hasOwnProperty(eventName)) {
       return;
     }
 
-    subscribers[eventName].forEach(function(item) {
-      item(info != undefined ? info : {});
+    this.subscribers[eventName].forEach(function(item) {
+      item(typeof info !== 'undefined' ? info : {});
     });
   }
-
-  events.emit = events.publish;
 
   /*
    * Removes all event subscribers
    */
   events.clear = function() {
-    subscribers = {};
+    this.subscribers = {};
   }
 
   global.events = events;
