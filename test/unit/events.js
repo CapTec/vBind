@@ -1,16 +1,16 @@
-describe('events', function () {
-	it('registers a subscriber', function () {
+describe('events', function() {
+	it('registers a subscriber', function() {
 		var subEvtName = 'test',
-		callback = function () {};
+			callback = function() {};
 
 		registered = events.subscribe(subEvtName, callback);
 		expect(events.subscribers[subEvtName]).toContain(callback);
 		events.subscribers = {};
 	});
 
-	it('removes a subscriber', function () {
-		var subEvtName = 'test';
-		callback = function () {};
+	it('removes a subscriber', function() {
+		var subEvtName = 'test',
+			callback = function() {};
 
 		registered = events.subscribe(subEvtName, callback);
 		registered.remove();
@@ -18,31 +18,31 @@ describe('events', function () {
 		events.subscribers = {};
 	});
 
-	it('clears all subscribers', function () {
+	it('clears all subscribers', function() {
 		var subEvtName = 'test',
-		callback = function () {},
-		r0 = events.subscribe(subEvtName, callback),
-		r1 = events.subscribe(subEvtName, callback);
+			callback = function() {},
+			r0 = events.subscribe(subEvtName, callback),
+			r1 = events.subscribe(subEvtName, callback);
 
 		events.clear();
 		expect(events.subscribers).not.toContain(callback);
 		events.subscribers = {};
 	});
 
-	it('publishes an event', function () {
+	it('publishes an event', function() {
 		var subEvtName = 'test',
-		callback = jasmine.createSpy('callback spy'),
-		r0 = events.subscribe(subEvtName, callback);
+			callback = jasmine.createSpy('callback spy'),
+			r0 = events.subscribe(subEvtName, callback);
 
 		events.publish(subEvtName);
 		expect(callback).toHaveBeenCalled();
 		events.subscribers = {};
 	});
 
-	it('doesn\'t publish a removed event', function () {
+	it('doesn\'t publish a removed event', function() {
 		var subEvtName = 'test',
-		callback = jasmine.createSpy('callback spy'),
-		r0 = events.subscribe(subEvtName, callback);
+			callback = jasmine.createSpy('callback spy'),
+			r0 = events.subscribe(subEvtName, callback);
 
 		r0.remove();
 		events.publish(subEvtName);
@@ -50,23 +50,23 @@ describe('events', function () {
 		events.subscribers = {};
 	});
 
-	it('doesn\'t trigger a callback that is not subscribed', function () {
+	it('doesn\'t trigger a callback that is not subscribed', function() {
 		var subEvtName = 'test',
-		callback = jasmine.createSpy('callback spy');
+			callback = jasmine.createSpy('callback spy');
 
 		events.publish(subEvtName);
 		expect(callback).not.toHaveBeenCalled();
 		events.subscribers = {};
 	});
 
-	it('published callback value is correct', function () {
+	it('published callback value is correct', function() {
 		var subEvtName = 'test',
-		callback = jasmine.createSpy('callback spy'),
-		r0 = events.subscribe(subEvtName, callback),
-		result = {
-			success: true,
-			data: "string data"
-		};
+			callback = jasmine.createSpy('callback spy'),
+			r0 = events.subscribe(subEvtName, callback),
+			result = {
+				success: true,
+				data: "string data"
+			};
 		events.publish(subEvtName, result);
 		expect(callback).toHaveBeenCalledWith(result);
 		events.subscribers = {};
