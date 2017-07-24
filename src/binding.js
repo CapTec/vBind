@@ -30,7 +30,15 @@
     container: null,
     _overrideProps: overrideProps,
     _override: override,
-    _bindToData: bindToData
+    _bindToData: bindToData,
+    _setElementText: setElementText,
+    _setTextContent: setTextContent,
+    _setAttributeToVariableValues: setAttributeToVariableValues,
+    _bind: bind,
+    _bindInput: bindInput,
+    _bindSelect: bindSelect,
+    _setAttributeValues: setAttributeValues,
+    _dataChanged: dataChanged
   };
 
   /*
@@ -81,7 +89,7 @@
 
     for (var i = 0; i < variables.length; i++) {
       var variable = variables[i];
-      setElementText.call(this, variable, element, text);
+      this._setElementText(variable, element, text);
     }
   }
 
@@ -115,7 +123,7 @@
       return;
 
     events.subscribe(this.model + '.' + variable + ':change', function(value) {
-      dataChanged.call(this, value, variable, element, text, this.data);
+      this._dataChanged(value, variable, element, text, this.data);
     }.bind(this));
 
     events.publish(this.model + '.' + variable + ':change', this.data[variable]);
@@ -128,7 +136,7 @@
     for (var i = 0; i < attributes.length; i++) {
       var attribute = attributes[i];
       var variables = getExpressionVariables(attribute);
-      setAttributeToVariableValues.call(this, element, variables, attribute);
+      this._setAttributeToVariableValues(element, variables, attribute);
     }
   }
 
@@ -141,7 +149,7 @@
       if (!this.data.hasOwnProperty(variable))
         continue;
 
-      bind.call(this, element, this.data, attribute, variable);
+      this._bind(element, this.data, attribute, variable);
       element[attribute.name] = attribute.value.replace('${' + variable + '}', this.data[variable]);
       events.subscribe(this.model + '.' + variable + ':change', function(value) {
         element[attribute.name] = value;
@@ -153,8 +161,8 @@
     for (var i = 0; i < this.children.length; i++) {
       var element = this.children[i];
       var attributes = getElementAttributes(element);
-      setTextContent.call(this, element);
-      setAttributeValues.call(this, element, attributes);
+      this._setTextContent( element);
+      this._setAttributeValues(element, attributes);
     }
   }
 
@@ -212,10 +220,10 @@
   function bind(element, data, attribute, property) {
     switch (element.tagName.toLowerCase()) {
       case 'input':
-        bindInput.call(this, element, data, attribute, property);
+        this._bindInput(element, data, attribute, property);
         break;
       case 'select':
-        bindSelect.call(this, element, data, attribute, property);
+        this._bindSelect(element, data, attribute, property);
         break;
     }
   }
