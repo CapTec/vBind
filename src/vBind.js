@@ -1,23 +1,25 @@
 (function(namespace) {
-  'use string';
+  'use strict';
   var events = namespace.events;
 
-  function Template(args) {
+  function VBind(args) {
     if (typeof args.container === 'undefined' || args.container === null)
-      throw new Error('No container element or selector provided for template.');
+      throw new Error('No container element for template.');
 
-    this.container = typeof args.container === 'string' ?
+    this.container = (typeof args.container === 'string') ?
       document.querySelector(args.container) : args.container;
 
-    if (typeof args.data !== 'undefined' && args.data !== null)
-      this.data = args.data;
+    if (typeof args.data === 'undefined' || args.data === null)
+      throw new Error('No data object for template binding.');
 
-    if (typeof args.path !== 'string')
+    this.data = args.data;
+
+    if (typeof args.path === 'undefined' || args.path === null)
       throw new Error('A template path must be specified');
 
-    getTemplate(args.path, populateContainer.bind(this), function(result) {
+    this._getVBind(args.path, this._populateContainer.bind(this), function(result) {
       throw new Error(result);
-    });
+    }.bind(this));
 
     if (typeof args.model === 'string')
       this.model = args.model;
@@ -25,9 +27,11 @@
     this._overrideProps();
   }
 
-  Template.prototype = {
+  VBind.prototype = {
     children: [],
     container: null,
+    propertySetter: propertySetter,
+    propertyGetter: propertyGetter,
     _overrideProps: overrideProps,
     _override: override,
     _bindToData: bindToData,
@@ -38,37 +42,44 @@
     _bindInput: bindInput,
     _bindSelect: bindSelect,
     _setAttributeValues: setAttributeValues,
-    _dataChanged: dataChanged
+    _dataChanged: dataChanged,
+    _getVBind: getVBind,
+    _populateContainer: populateContainer
   };
 
   /*
-   * overrides properties on the data object to allow property
+   * overrides properties on the data object to allow
    * future property value changes to be propogated to the eventing system
    * @param {Object} data - The data to publish changes for
    * @param {string} model - The model name to publish changes for
    */
   function overrideProps() {
     for (var prop in this.data) {
-      if (!this.data.hasOwnProperty(prop))
-        continue;
-
       this._override(prop);
     }
   }
 
   function override(prop) {
-    var _private = this.data[prop],
-        scope = this;
-    Object.defineProperty(scope.data, prop, {
-      get: function() {
-        return _private;
-      },
-      set: function(val) {
-        _private = val;
-        events.publish(scope.model + '.' + prop + ':change', val);
-      }
+    var args = {
+        scope: this,
+        private: this.data[prop],
+        prop: prop
+      };
+
+    Object.defineProperty(args.scope.data, prop, {
+      get: args.scope.propertyGetter.bind(args),
+      set: args.scope.propertySetter.bind(args)
     });
   };
+
+  function propertySetter(val) {
+    this.private = val;
+    events.publish(this.scope.model + '.' + this.prop + ':change', val);
+  }
+
+  function propertyGetter() {
+    return this.private;
+  }
 
   /*
    * sets the text content of a given element, replaces variable
@@ -204,7 +215,7 @@
   }
 
   /*
-   * populates the Template container with the given markup
+   * populates the VBind container with the given markup
    * @param {string} markup - The HTML markup to inject into the
    *                          current container
    */
@@ -258,14 +269,14 @@
    * @param {callback} callback - A function to execute when async loading is complete
    *
    */
-  function getTemplate(path, success_callback, failure_callback) {
+  function getVBind(path, success_callback, failure_callback) {
     var xhr = new XMLHttpRequest();
 
     xhr.addEventListener("readystatechange", function() {
       if (this.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-        success_callback.call(null, this.responseText);
+        success_callback(this.responseText);
       } else if(this.readyState === XMLHttpRequest.DONE && xhr.status !== 200) {
-        failure_callback.call(null, this.responseText);
+        failure_callback(this.responseText);
       }
     });
 
@@ -273,5 +284,5 @@
     xhr.send(null);
   }
 
-  namespace.Template = Template;
+  namespace.VBind = VBind;
 }(window));
