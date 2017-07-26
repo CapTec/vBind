@@ -17,7 +17,7 @@
     if (typeof args.path === 'undefined' || args.path === null)
       throw new Error('A template path must be specified');
 
-    this._getVBind(args.path, this._populateContainer.bind(this), function(result) {
+    this._get_template(args.path, this._populateContainer.bind(this), function(result) {
       throw new Error(result);
     }.bind(this));
 
@@ -43,8 +43,12 @@
     _bindSelect: bindSelect,
     _setAttributeValues: setAttributeValues,
     _dataChanged: dataChanged,
-    _getVBind: getVBind,
-    _populateContainer: populateContainer
+    _get_template: get_template,
+    _populateContainer: populateContainer,
+    _getExpressionVariables: getExpressionVariables,
+    _getElementAttributes: getElementAttributes,
+    _populateChildrenProperty: populateChildrenProperty,
+    populateContainer: populateContainer
   };
 
   /*
@@ -179,7 +183,10 @@
 
   function getExpressionVariables(attribute) {
     var variables = null;
-    if (attribute.value === null || attribute.value === '')
+    if (typeof attribute === 'undefined' ||
+     attribute === null ||
+     attribute.value === null ||
+     attribute.value === '')
       return variables;
 
     var regex = /\${([A-Za-z\d]+?)\}/g;
@@ -208,7 +215,7 @@
   }
 
   function populateChildrenProperty() {
-    for (var i = this.container.children.length - 1; i >= 0; i--) {
+    for (var i = 0; i < this.container.children.length; i++) {
       var elem = this.container.children[i];
       this.children.push(elem);
     }
@@ -221,7 +228,7 @@
    */
   function populateContainer(markup) {
     this.container.innerHTML = markup;
-    populateChildrenProperty.call(this);
+    this._populateChildrenProperty.call(this);
     this._bindToData();
   }
 
@@ -269,9 +276,8 @@
    * @param {callback} callback - A function to execute when async loading is complete
    *
    */
-  function getVBind(path, success_callback, failure_callback) {
+  function get_template(path, success_callback, failure_callback) {
     var xhr = new XMLHttpRequest();
-
     xhr.addEventListener("readystatechange", function() {
       if (this.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
         success_callback(this.responseText);

@@ -1,5 +1,20 @@
 var stubbed_noop = function() {};
 describe('VBind', function() {
+  var VBind_Mock = null;;
+
+  beforeEach(function() {
+    VBind_Mock = function(args) {
+      VBind.call(this, args);
+    };
+    VBind_Mock.prototype = Object.create(VBind.prototype);
+    VBind_Mock.prototype._get_template = stubbed_noop;
+    VBind_Mock.prototype._populateContainer = stubbed_noop;
+  });
+
+  afterEach(function(){
+    VBind_Mock = null;
+  });
+
   describe('constructor', function() {
     it('should throw Error if container is undefined', function() {
       var args = {
@@ -11,7 +26,7 @@ describe('VBind', function() {
       };
 
       expect(function() {
-        new VBind(args)
+        new VBind_Mock(args)
       }).toThrow(new Error('No container element for template.'));
     });
 
@@ -25,7 +40,7 @@ describe('VBind', function() {
       };
 
       expect(function() {
-        new VBind(args)
+        new VBind_Mock(args)
       }).toThrow(new Error('No container element for template.'));
     });
 
@@ -42,12 +57,14 @@ describe('VBind', function() {
         container: '#selector'
       };
 
-      new VBind(args);
+      new VBind_Mock(args);
       expect(expected_callback).toHaveBeenCalled();
       document.querySelector = tmp;
     });
 
     it('should set VBind container to arg.container if not string', function() {
+      VBind_Mock.prototype._overrideProps = stubbed_noop; // stubbed
+
       var expected_container = {
         innerHTML: '<h1>Test</h1>'
       };
@@ -59,11 +76,6 @@ describe('VBind', function() {
         path: '',
         container: expected_container
       };
-
-      var VBind_Mock = VBind.prototype.constructor;
-      VBind_Mock.prototype = Object.create(VBind.prototype);
-      VBind_Mock.prototype._overrideProps = stubbed_noop; // stubbed
-      VBind_Mock.prototype._getVBind = stubbed_noop; // stubbed
 
       var mock_instance = new VBind_Mock(args);
       expect(mock_instance.container).toBe(expected_container);
@@ -79,7 +91,7 @@ describe('VBind', function() {
       };
 
       expect(function() {
-        new VBind(args)
+        new VBind_Mock(args)
       }).toThrow(new Error('No data object for template binding.'));
     });
 
@@ -93,7 +105,7 @@ describe('VBind', function() {
       };
 
       expect(function() {
-        new VBind(args)
+        new VBind_Mock(args)
       }).toThrow(new Error('No data object for template binding.'));
     });
 
@@ -107,7 +119,7 @@ describe('VBind', function() {
       };
 
       expect(function() {
-        new VBind(args)
+        new VBind_Mock(args)
       }).toThrow(new Error('A template path must be specified'));
     });
 
@@ -121,7 +133,7 @@ describe('VBind', function() {
       };
 
       expect(function() {
-        new VBind(args)
+        new VBind_Mock(args)
       }).toThrow(new Error('A template path must be specified'));
     });
 
@@ -138,17 +150,11 @@ describe('VBind', function() {
         failure_callback.call(this, 'timed out');
       };
 
-      var VBind_Mock = function(args) {
-        VBind.call(this, args);
-      };
-
-      VBind_Mock.prototype = Object.create(VBind.prototype);
       VBind_Mock.prototype._overrideProps = stubbed_noop; // stubbed
-      VBind_Mock.prototype._getVBind = get_template;
+      VBind_Mock.prototype._get_template = get_template;
 
       expect(function() {
         new VBind_Mock(args);
-
       }).toThrow(new Error('timed out'));
     });
 
@@ -165,13 +171,8 @@ describe('VBind', function() {
         success_callback.call(this, '<h1>test page</h1>');
       };
 
-      var VBind_Mock = function(args) {
-        VBind.call(this, args);
-      };
-      VBind_Mock.prototype = Object.create(VBind.prototype);
       VBind_Mock.prototype._overrideProps = stubbed_noop; // stubbed
-      VBind_Mock.prototype._getVBind = get_template;
-      // get template calls _populateContainer on success
+      VBind_Mock.prototype._get_template = get_template;
       VBind_Mock.prototype._populateContainer = jasmine.createSpy('success_callback called');
       var t0 = new VBind_Mock(args);
 
