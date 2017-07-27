@@ -48,7 +48,10 @@
     _getExpressionVariables: getExpressionVariables,
     _getElementAttributes: getElementAttributes,
     _populateChildrenProperty: populateChildrenProperty,
-    populateContainer: populateContainer
+    populateContainer: populateContainer,
+    bindSelect: bindSelect,
+    selectListener: selectListener,
+    bindChkOrRadio: bindChkOrRadio
   };
 
   /*
@@ -265,9 +268,17 @@
   }
 
   function bindSelect(element, data, attribute, property) {
-    element.addEventListener('change', function(e) {
-      data[property] = element[attribute.name];
-    }.bind(this));
+    var args = {
+      element: element,
+      data: data,
+      attribute: attribute,
+      property: property
+    };
+    element.addEventListener('change', selectListener.bind(args));
+  }
+
+  function selectListener(event) {
+    this.data[this.property] = this.element[this.attribute.name];
   }
 
   /*
@@ -278,10 +289,10 @@
    */
   function get_template(path, success_callback, failure_callback) {
     var xhr = new XMLHttpRequest();
-    xhr.addEventListener("readystatechange", function() {
-      if (this.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+    xhr.addEventListener("load", function() {
+      if (this.readyState === 4 && xhr.status === 200) {
         success_callback(this.responseText);
-      } else if(this.readyState === XMLHttpRequest.DONE && xhr.status !== 200) {
+      } else if(this.readyState === 4 && xhr.status !== 200) {
         failure_callback(this.responseText);
       }
     });

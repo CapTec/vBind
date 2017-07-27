@@ -1,4 +1,5 @@
 var stubbed_noop = function() {};
+var mock = require('xhr-mock');
 
 describe('VBind', function() {
   var VBind_Mock;
@@ -194,23 +195,24 @@ describe('VBind', function() {
 
   describe('populateChildrenProperty', function() {
     it('should loop over child elements in VBind container and add them to VBind children', function() {
-      var actual = [];
-      var container = {
-        children: [{
+      var actual = [],
+        expected = [{
           innerHTML: "<label>hello</label>"
         }, {
           innerHTML: "<label>world</label>"
-        }]
-      };
+        }],
+        container = {
+          children: [{
+            innerHTML: "<label>hello</label>"
+          }, {
+            innerHTML: "<label>world</label>"
+          }]
+        };
       var state = {
         children: actual,
         container: container
       };
-      var expected = [{
-        innerHTML: "<label>hello</label>"
-      }, {
-        innerHTML: "<label>world</label>"
-      }];
+
 
       VBind_Mock.prototype._populateChildrenProperty.call(state);
       expect(actual).toEqual(expected);
@@ -235,23 +237,95 @@ describe('VBind', function() {
     });
   });
 
-  describe('get_template', function() {
-    var mock = require('xhr-mock');
-
-    it('should call success callback if readystate === 4', function() {
+  describe('get_template == 200', function() {
+    it('should call success callback if readystate === 4 and status === 200', function(done) {
       mock.setup();
-      mock.get('./templates/template1.html', function(req, res) {
+      mock.get('template1.html', function(req, res) {
         return res
           .status(200)
-          .header('Content-Type', 'application/json')
-          .body('<h1>dummy data</h1>');
+          .body('<h1>Heading</h1>');
       });
 
-      VBind.prototype._get_template.call(null, './templates/template1.html', function() {
-        expect(expected.callback).toHaveBeenCalled();
+      var expected = '<h1>Heading</h1>';
+      VBind.prototype._get_template('template1.html', function(actual) {
         mock.teardown();
+        expect(actual).toBe(expected);
         done();
-      }, function() {});
+      }, stubbed_noop);
+    });
+
+    it('should call failure callback if readystate === 4 and status !== 200', function(done) {
+      mock.setup();
+      mock.get('template1.html', function(req, res) {
+        return res
+          .status(404)
+          .body('NOT FOUND');
+      });
+
+      var expected = 'NOT FOUND';
+      VBind.prototype._get_template('template1.html', stubbed_noop, function(actual) {
+        mock.teardown();
+        expect(actual).toBe(expected);
+        done();
+      });
+    });
+  });
+
+  describe('bindSelect', function() {
+    it('should call addEventListener', function() {
+      var element = {
+          addEventListener: stubbed_noop
+        },
+        data = {
+          value: "test"
+        },
+        attribute = {
+          name: "value",
+          value: "test"
+        },
+        property = '';
+      spyOn(element, 'addEventListener');
+      VBind_Mock.prototype.selectListener = stubbed_noop;
+      VBind_Mock.prototype.bindSelect(element, data, attribute, property);
+      expect(element.addEventListener).toHaveBeenCalled();
+    });
+  });
+
+  describe('selectListener', function() {
+    it('should set data.value to specified element attribute value', function() {
+      var args = {
+        element: {
+          value: "new value"
+        },
+        data: {
+          value: "test"
+        },
+        attribute: {
+          name: "value"
+        },
+        property: 'value'
+      };
+
+      VBind_Mock.prototype.selectListener.call(args);
+      expect(args.data.value).toBe('new value');
+    });
+  });
+
+  describe('bindChkOrRadio', function() {
+    it('should set data.value to specified element attribute value', function() {
+      var element = {
+        value: "new value"
+      };
+      var data = {
+        value: "test"
+      };
+      var property = "value";
+      var attribute = {
+        name: "value"
+      }
+
+      VBind.prototype.bindChkOrRadio(element, data, attribute, property);
+      expect(data.value).toBe('new value');
     });
   });
 });
