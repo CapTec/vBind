@@ -17,14 +17,14 @@
     if (typeof args.path === 'undefined' || args.path === null)
       throw new Error('A template path must be specified');
 
-    this._get_template(args.path, this._populateContainer.bind(this), function(result) {
+    this.get_template(args.path, this.populateContainer.bind(this), function(result) {
       throw new Error(result);
     }.bind(this));
 
     if (typeof args.model === 'string')
       this.model = args.model;
 
-    this._overrideProps();
+    this.overrideProps();
   }
 
   VBind.prototype = {
@@ -32,26 +32,24 @@
     container: null,
     propertySetter: propertySetter,
     propertyGetter: propertyGetter,
-    _overrideProps: overrideProps,
-    _override: override,
-    _bindToData: bindToData,
-    _setElementText: setElementText,
-    _setTextContent: setTextContent,
-    _setAttributeToVariableValues: setAttributeToVariableValues,
-    _bind: bind,
-    _bindInput: bindInput,
-    _bindSelect: bindSelect,
-    _setAttributeValues: setAttributeValues,
-    _dataChanged: dataChanged,
-    _get_template: get_template,
-    _populateContainer: populateContainer,
-    _getExpressionVariables: getExpressionVariables,
-    _getElementAttributes: getElementAttributes,
-    _populateChildrenProperty: populateChildrenProperty,
+    overrideProps: overrideProps,
+    override: override,
+    bindToData: bindToData,
+    setElementText: setElementText,
+    setTextContent: setTextContent,
+    setAttributeToVariableValues: setAttributeToVariableValues,
+    bind: bind,
+    setAttributeValues: setAttributeValues,
+    dataChanged: dataChanged,
+    get_template: get_template,
     populateContainer: populateContainer,
+    getExpressionVariables: getExpressionVariables,
+    getElementAttributes: getElementAttributes,
+    populateChildrenProperty: populateChildrenProperty,
     bindSelect: bindSelect,
-    selectListener: selectListener,
-    bindChkOrRadio: bindChkOrRadio
+    elementValueListener: elementValueListener,
+    elementFloatListener: elementFloatListener,
+    bindInput: bindInput
   };
 
   /*
@@ -62,7 +60,7 @@
    */
   function overrideProps() {
     for (var prop in this.data) {
-      this._override(prop);
+      this.override(prop);
     }
   }
 
@@ -107,7 +105,7 @@
 
     for (var i = 0; i < variables.length; i++) {
       var variable = variables[i];
-      this._setElementText(variable, element, text);
+      this.setElementText(variable, element, text);
     }
   }
 
@@ -141,7 +139,7 @@
       return;
 
     events.subscribe(this.model + '.' + variable + ':change', function(value) {
-      this._dataChanged(value, variable, element, text, this.data);
+      this.dataChanged(value, variable, element, text, this.data);
     }.bind(this));
 
     events.publish(this.model + '.' + variable + ':change', this.data[variable]);
@@ -153,8 +151,8 @@
   function setAttributeValues(element, attributes) {
     for (var i = 0; i < attributes.length; i++) {
       var attribute = attributes[i];
-      var variables = getExpressionVariables(attribute);
-      this._setAttributeToVariableValues(element, variables, attribute);
+      var variables = this.getExpressionVariables(attribute);
+      this.setAttributeToVariableValues(element, variables, attribute);
     }
   }
 
@@ -167,7 +165,7 @@
       if (!this.data.hasOwnProperty(variable))
         continue;
 
-      this._bind(element, this.data, attribute, variable);
+      this.bind(element, this.data, attribute, variable);
       element[attribute.name] = attribute.value.replace('${' + variable + '}', this.data[variable]);
       events.subscribe(this.model + '.' + variable + ':change', function(value) {
         element[attribute.name] = value;
@@ -178,9 +176,9 @@
   function bindToData() {
     for (var i = 0; i < this.children.length; i++) {
       var element = this.children[i];
-      var attributes = getElementAttributes(element);
-      this._setTextContent( element);
-      this._setAttributeValues(element, attributes);
+      var attributes = this.getElementAttributes(element);
+      this.setTextContent(element);
+      this.setAttributeValues(element, attributes);
     }
   }
 
@@ -231,8 +229,8 @@
    */
   function populateContainer(markup) {
     this.container.innerHTML = markup;
-    this._populateChildrenProperty.call(this);
-    this._bindToData();
+    this.populateChildrenProperty.call(this);
+    this.bindToData();
   }
 
   /*
@@ -241,30 +239,29 @@
   function bind(element, data, attribute, property) {
     switch (element.tagName.toLowerCase()) {
       case 'input':
-        this._bindInput(element, data, attribute, property);
+        this.bindInput(element, data, attribute, property);
         break;
       case 'select':
-        this._bindSelect(element, data, attribute, property);
+        this.bindSelect(element, data, attribute, property);
         break;
     }
   }
 
   function bindInput(element, data, attribute, property) {
-    if (element.type === 'checkbox' || element.type === 'radio') {
-      element.addEventListener('change', bindChkOrRadio.bind(this, element, data, attribute, property));
-    } else if (element.type === 'number') {
-      element.addEventListener('input', function(e) {
-        data[property] = parseFloat(element[attribute.name]);
-      }.bind(this));
-    } else {
-      element.addEventListener('input', function(e) {
-        data[property] = element[attribute.name];
-      }.bind(this));
-    }
-  }
+    var args = {
+      element: element,
+      data: data,
+      attribute: attribute,
+      property: property
+    };
 
-  function bindChkOrRadio(element, data, attribute, property) {
-    data[property] = element[attribute.name];
+    if (element.type === 'checkbox' || element.type === 'radio') {
+      element.addEventListener('change', this.elementValueListener.bind(args));
+    } else if (element.type === 'number') {
+      element.addEventListener('input', this.elementFloatListener.bind(args));
+    } else {
+      element.addEventListener('input', this.elementValueListener.bind(args));
+    }
   }
 
   function bindSelect(element, data, attribute, property) {
@@ -274,11 +271,15 @@
       attribute: attribute,
       property: property
     };
-    element.addEventListener('change', selectListener.bind(args));
+    element.addEventListener('change', elementValueListener.bind(args));
   }
 
-  function selectListener(event) {
+  function elementValueListener(event) {
     this.data[this.property] = this.element[this.attribute.name];
+  }
+
+  function elementFloatListener(event) {
+    this.data[this.property] = parseFloat(this.element[this.attribute.name]);
   }
 
   /*

@@ -1,4 +1,4 @@
-var stubbed_noop = function() {};
+var stubbednoop = function() {};
 describe('VBind', function() {
   var VBind_Mock = null;;
 
@@ -7,8 +7,8 @@ describe('VBind', function() {
       VBind.call(this, args);
     };
     VBind_Mock.prototype = Object.create(VBind.prototype);
-    VBind_Mock.prototype._get_template = stubbed_noop;
-    VBind_Mock.prototype._populateContainer = stubbed_noop;
+    VBind_Mock.prototype.get_template = stubbednoop;
+    VBind_Mock.prototype.populateContainer = stubbednoop;
   });
 
   afterEach(function(){
@@ -63,7 +63,7 @@ describe('VBind', function() {
     });
 
     it('should set VBind container to arg.container if not string', function() {
-      VBind_Mock.prototype._overrideProps = stubbed_noop; // stubbed
+      VBind_Mock.prototype.overrideProps = stubbednoop; // stubbed
 
       var expected_container = {
         innerHTML: '<h1>Test</h1>'
@@ -77,8 +77,8 @@ describe('VBind', function() {
         container: expected_container
       };
 
-      var mock_instance = new VBind_Mock(args);
-      expect(mock_instance.container).toBe(expected_container);
+      var mockinstance = new VBind_Mock(args);
+      expect(mockinstance.container).toBe(expected_container);
     });
 
     it('should throw Error if data is undefined', function() {
@@ -150,8 +150,8 @@ describe('VBind', function() {
         failure_callback.call(this, 'timed out');
       };
 
-      VBind_Mock.prototype._overrideProps = stubbed_noop; // stubbed
-      VBind_Mock.prototype._get_template = get_template;
+      VBind_Mock.prototype.overrideProps = stubbednoop; // stubbed
+      VBind_Mock.prototype.get_template = get_template;
 
       expect(function() {
         new VBind_Mock(args);
@@ -171,12 +171,12 @@ describe('VBind', function() {
         success_callback.call(this, '<h1>test page</h1>');
       };
 
-      VBind_Mock.prototype._overrideProps = stubbed_noop; // stubbed
-      VBind_Mock.prototype._get_template = get_template;
-      VBind_Mock.prototype._populateContainer = jasmine.createSpy('success_callback called');
+      VBind_Mock.prototype.overrideProps = stubbednoop; // stubbed
+      VBind_Mock.prototype.get_template = get_template;
+      VBind_Mock.prototype.populateContainer = jasmine.createSpy('success_callback called');
       var t0 = new VBind_Mock(args);
 
-      expect(t0._populateContainer).toHaveBeenCalled();
+      expect(t0.populateContainer).toHaveBeenCalled();
     });
   });
 });
