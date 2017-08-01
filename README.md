@@ -1,4 +1,6 @@
 # vBind
+[![Build Status](https://travis-ci.org/CapTec/vBind.svg?branch=master)](https://travis-ci.org/CapTec/vBind)
+
 vBind allows two way data binding between javascript objects and HTML markup using standardised variable interpolation syntax as found in ES6 template strings.
 
 Usage:
@@ -46,4 +48,4 @@ var temp1 = new Template({
 
 Markup that uses variable interpolation must be formatted similarly to as if it was a standard ES6 template string, where variables are stored within "${variable}".
 
-vBind reflects changes made to bound object properties in real time. It wraps the getter and setter functions for bound properties and publishes change events to an eventing system when changes are made. This means that changing a property on the underlying bound object using javascript will immediately be reflected on the UI with no need for any manual intervention. 
+vBind reflects changes made to bound object properties in real time. It wraps the getter and setter functions for bound properties and publishes change events to an eventing system when changes are made. This means that changing a property on the underlying bound object using javascript will immediately be reflected on the UI with no need for any manual intervention.
