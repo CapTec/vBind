@@ -191,7 +191,7 @@
       return variables;
 
     var regex = /\${([A-Za-z\d]+?)\}/g;
-    let m;
+    var m;
     while ((m = regex.exec(attribute.value)) !== null) {
       if (variables === null)
         variables = [];
