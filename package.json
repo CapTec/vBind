@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "devDependencies": {
     "browserify": "^14.4.0",
+    "grunt": "^1.0.1",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-karma": "^2.0.0",
     "jasmine-core": "^2.6.4",
     "karma": "^1.7.0",
     "karma-browserify": "^5.1.1",
