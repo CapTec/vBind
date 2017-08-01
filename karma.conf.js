@@ -22,8 +22,7 @@ module.exports = function(config) {
 
 
     // list of files to exclude
-    exclude: [
-    ],
+    exclude: [],
 
 
     // preprocess matching files before serving them to the browser
@@ -39,6 +38,11 @@ module.exports = function(config) {
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
     reporters: ['progress', 'coverage'],
 
+    coverageReporter: {
+      type: "lcov",
+      dir: "coverage",
+      subdir: 'report-lcov'
+    },
 
     // web server port
     port: 9876,
