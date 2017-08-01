@@ -4,7 +4,7 @@ vBind allows two way data binding between javascript objects and HTML markup usi
 
 [Demo Page](https://captec.github.io/vBind/src/binding.html)
 
-Pre Requisite Instructions:
+## Pre Requisite Instructions:
 1. Make sure that your environment has Google Chrome and Phantomjs >= 2.x  installed.
 2. Make sure nodejs 6 or greater is installed.
 3. Clone the repository
@@ -25,7 +25,7 @@ npm install jasmine-firefox-launcher --save-dev
 ```
 And add them to karma.conf.js
 
-Library Usage:
+## Library Usage:
 First, create a data object to bind.
 
 ```javascript
