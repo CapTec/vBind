@@ -1,4 +1,4 @@
-# vBind [![Build Status](https://travis-ci.org/CapTec/vBind.svg?branch=master)](https://travis-ci.org/CapTec/vBind)
+# vBind [![Build Status](https://travis-ci.org/CapTec/vBind.svg?branch=master)](https://travis-ci.org/CapTec/vBind)[![Coverage Status](https://coveralls.io/repos/github/CapTec/vBind/badge.svg?branch=master)](https://coveralls.io/github/CapTec/vBind?branch=master)
 
 vBind allows two way data binding between javascript objects and HTML markup using standardised variable interpolation syntax as found in ES6 template strings.
 
