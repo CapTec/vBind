@@ -24,16 +24,15 @@
     if (typeof args.model === 'string')
       this.model = args.model;
 
-    this.overrideProps();
+    this.changePublisher = new ChangePublisher({
+      model: this.model,
+      data: this.data
+    });
   }
 
   VBind.prototype = {
     children: [],
     container: null,
-    propertySetter: propertySetter,
-    propertyGetter: propertyGetter,
-    overrideProps: overrideProps,
-    override: override,
     bindToData: bindToData,
     setElementText: setElementText,
     setTextContent: setTextContent,
@@ -51,40 +50,6 @@
     elementFloatListener: elementFloatListener,
     bindInput: bindInput
   };
-
-  /*
-   * overrides properties on the data object to allow
-   * future property value changes to be propogated to the eventing system
-   * @param {Object} data - The data to publish changes for
-   * @param {string} model - The model name to publish changes for
-   */
-  function overrideProps() {
-    for (var prop in this.data) {
-      this.override(prop);
-    }
-  }
-
-  function override(prop) {
-    var args = {
-        scope: this,
-        private: this.data[prop],
-        prop: prop
-      };
-
-    Object.defineProperty(args.scope.data, prop, {
-      get: args.scope.propertyGetter.bind(args),
-      set: args.scope.propertySetter.bind(args)
-    });
-  };
-
-  function propertySetter(val) {
-    this.private = val;
-    events.publish(this.scope.model + '.' + this.prop + ':change', val);
-  }
-
-  function propertyGetter() {
-    return this.private;
-  }
 
   /*
    * sets the text content of a given element, replaces variable

@@ -15,87 +15,6 @@ describe('VBind', function() {
     VBind_Mock = null;
   });
 
-  it('should attempt to override data properties with overrideProps()', function() {
-    VBind_Mock.prototype.override = stubbed_noop;
-    VBind_Mock.prototype.get_template = stubbed_noop;
-    VBind_Mock.prototype.populateContainer = stubbed_noop;
-
-    var expected = {
-      data: {
-        test: true,
-        property: "lol"
-      },
-      container: {},
-      override: function(prop) {}
-    };
-
-    spyOn(expected, 'override');
-
-    VBind_Mock.prototype.overrideProps.call(expected);
-
-    expect(expected.override).toHaveBeenCalled();
-    expect(expected.override.calls.allArgs()).toContain(['property']);
-    expect(expected.override.calls.allArgs()).toContain(['test']);
-  });
-
-  it('should call over-write getters and setters for data object', function() {
-    VBind_Mock.prototype.get_template = stubbed_noop;
-    var expected = {
-      data: {
-        test: true
-      },
-      model: 'eventid',
-      propertySetter: VBind_Mock.prototype.propertySetter,
-      propertyGetter: VBind_Mock.prototype.propertyGetter
-    };
-
-    VBind_Mock.prototype.override.call(expected, 'test');
-
-    var getSpy = spyOnProperty(expected.data, 'test', 'get');
-    var setSpy = spyOnProperty(expected.data, 'test', 'set');
-
-    expected.data.test = false;
-    expect(setSpy).toHaveBeenCalled();
-    var tmp = expected.data.test;
-    expect(getSpy).toHaveBeenCalled();
-  });
-
-  it('should return correct value for overridden data property', function() {
-    VBind_Mock.prototype.get_template = stubbed_noop;
-    var expected = {
-      data: {
-        test: true
-      },
-      model: 'eventid',
-      propertySetter: VBind_Mock.prototype.propertySetter,
-      propertyGetter: VBind_Mock.prototype.propertyGetter
-    };
-
-    VBind_Mock.prototype.override.call(expected, 'test');
-
-    var tmp = expected.data.test;
-    expect(tmp).toBe(true);
-  });
-
-  it('should set correct value for overridden data property', function() {
-    VBind_Mock.prototype.get_template = stubbed_noop;
-    var expected = {
-      data: {
-        test: true
-      },
-      model: 'eventid',
-      propertySetter: VBind_Mock.prototype.propertySetter,
-      propertyGetter: VBind_Mock.prototype.propertyGetter
-    };
-
-    VBind_Mock.prototype.override.call(expected, 'test');
-
-    expected.data.test = false;
-    expect(expected.data.test).toBe(false);
-    expected.data.test = true;
-    expect(expected.data.test).toBe(true);
-  });
-
   describe('getExpressionVariables', function() {
     it('should return null if called with null', function() {
       var attributemock = null;
@@ -478,7 +397,10 @@ describe('VBind', function() {
       events.subscribe = stubbed_noop;
 
       var variables = ['test'];
-      var attribute = { name:'selected', value: '${test}' };
+      var attribute = {
+        name: 'selected',
+        value: '${test}'
+      };
       var data = {
         test: 'New Value'
       };
