@@ -15,7 +15,7 @@ npm install
 ```
 To run continuous integration locally, execute 
 ```
-npm run test
+grunt devmode
 ```
 This will spool up the jasmine launcher and any registered jasmine browser launchers that are defined in karma.conf.js. 
 
