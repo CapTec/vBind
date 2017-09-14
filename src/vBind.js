@@ -3,6 +3,7 @@
   var events = namespace.events;
 
   function VBind(args) {
+    this.children = [];
     if (typeof args.container === 'undefined' || args.container === null)
       throw new Error('No container element for template.');
 
@@ -31,8 +32,6 @@
   }
 
   VBind.prototype = {
-    children: [],
-    container: null,
     bindToData: bindToData,
     setElementText: setElementText,
     setTextContent: setTextContent,
