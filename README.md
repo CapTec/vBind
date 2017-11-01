@@ -58,14 +58,14 @@ Create a new template file, e.g. /templates/template1.html which looks like this
 <label>${template2Label}</label>
 ```
 
-And finally create a new Template instance, passing in the path to a template, the container we wish to use, the data to bind against and a model name.
+And finally create a new VBind instance, passing in the path to a template, the container we wish to use, the data to bind against and a model name.
 ```javascript
-var temp1 = new Template({
-    path: './templates/template1.html',
-    container: '#container1',
-    data: boundObject,
-    model: "boundObject"
-  });
+var temp1 = new VBind({
+  path: './templates/template1.html',
+  container: '#container1',
+  data: boundObject,
+  model: "boundObject"
+});
 ```
 
 Markup that uses variable interpolation must be formatted similarly to as if it was a standard ES6 template string, where variables are stored within "${variable}".
