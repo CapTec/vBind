@@ -2,7 +2,7 @@
 
 vBind allows two way data binding between javascript objects and HTML markup using standardised variable interpolation syntax as found in ES6 template strings.
 
-[Demo Page](https://captec.github.io/vBind/src/binding.html)
+[Demo Page](https://danielharoldlane.github.io/vBind/src/binding.html)
 
 ## Pre Requisite Instructions:
 1. Make sure that your environment has Google Chrome and Phantomjs >= 2.x  installed.
